@@ -15,7 +15,9 @@ export default function BlockTarget(props) {
   const [{ isOver }, drop] = useDrop({
     accept: ItemTypes.CARD,
     drop: (item, monitor) => {
+      console.log(item);
       if (item.row === -1) {
+        console.log("Yess");
         deleteBlock(item.data.name);
       } else deleteFromTarget(item.data.name, item.row, item.col);
       addToTarget(item.data, row, col);

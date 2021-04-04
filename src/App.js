@@ -40,12 +40,15 @@ function App() {
   // const classes = useStyles();
   useEffect(() => {
     axios
-      .get("http://localhost:3000/schedule/5f9aa9dc51c33560c0666e2e/T0")
+      .get(
+        "https://nameless-sea-65364.herokuapp.com/schedule/5f9aa9dc51c33560c0666e2e/T4"
+      )
       .then(function (response) {
+        // console.log(response);
         const days = response.data[0].schedule.days;
-        console.log(days);
+        // console.log(days);
         let newDates = [];
-        const dayIndex = ["MON", "TUE", "WED", "THURS", "FRI", "SAT"];
+        const dayIndex = ["MON", "TUE", "WED", "THURS", "FRI", "SAT", "SUN"];
         const newRows = [
           { name: "Slot 1", data: [] },
           { name: "Slot 2", data: [] },
@@ -128,11 +131,11 @@ function App() {
       }
     });
 
-    // console.log(data);
+    console.log(data);
     setBusy(true);
     axios
       .post(
-        "http://localhost:3000/schedule/5f9aa9dc51c33560c0666e2e/T0/update",
+        "https://secret-sea-25561.herokuapp.com/schedule/5f9aa9dc51c33560c0666e2e/T1/update",
         data
       )
       .then((res) => {
@@ -163,13 +166,14 @@ function App() {
     blocks.forEach((data, i) => {
       data.courses.forEach((course, j) => {
         if (course.name === name) {
-          let modBlocks = blocks.filter((el, index) => {
-            return index !== i;
-          });
+          // let modBlocks = blocks.filter((el, index) => {
+          //   return index !== i;
+          // });
           let modCourses = blocks[i].courses.filter((el, index) => {
             return index !== j;
           });
-          let newBlocks = [...modBlocks, { courses: modCourses }];
+          let newBlocks = blocks;
+          newBlocks[i] = { courses: modCourses };
           setBlocks(newBlocks);
         }
       });
@@ -191,9 +195,9 @@ function App() {
       <div className="App">
         <Navigation saveData={saveData} />
         <Grid container>
-          <Grid item xs={2} style={{ overflow: "auto" }}>
+          <Grid item xs={2} style={{ overflow: "auto", height: "92vh" }}>
             {blocks?.map((group) => {
-              return group.courses.length ? (
+              return group.courses?.length ? (
                 <div
                   style={{
                     border: "1px solid #9FA8DA",

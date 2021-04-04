@@ -58,6 +58,9 @@ export default function MenuAppBar({ saveData }) {
           <Button style={{ color: "white" }} onClick={() => saveData()}>
             SAVE
           </Button>
+          <Button style={{ color: "white" }} onClick={() => {}}>
+            EXPORT
+          </Button>
           <Typography variant="h6" className={classes.title}>
             COMPRE SCHEDULER
           </Typography>

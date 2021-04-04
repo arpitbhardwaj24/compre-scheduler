@@ -1,4 +1,4 @@
-import React, { createContext, useContext } from "react";
+import React, { createContext, useContext, useEffect } from "react";
 import { useState } from "react";
 import { withStyles, makeStyles } from "@material-ui/core/styles";
 import Table from "@material-ui/core/Table";
@@ -17,6 +17,8 @@ import { Style } from "@material-ui/icons";
 export const TableContext = createContext({
   deleteFromTarget: null,
   addToTarget: null,
+  unallotInvigilator: null,
+  updateInvigilator: null,
 });
 
 const StyledTableCell = withStyles((theme) => ({
@@ -51,15 +53,18 @@ const useStyles = makeStyles({
 export default function CustomizedTables() {
   const classes = useStyles();
 
-  const { dates, rows, setRows } = useContext(BlockContext);
+  const { deleteBlock, dates, rows, setRows } = useContext(BlockContext);
 
-  console.log(dates);
+  // console.log(dates);
+  useEffect(() => {
+    console.log(rows);
+  }, [rows]);
 
   const deleteFromTarget = (name, row, col) => {
     const blocks = rows[row].data[col];
     let newBlocks;
     blocks.forEach((data, i) => {
-      data.courses.forEach((course, j) => {
+      data.courses?.forEach((course, j) => {
         if (course.name === name) {
           let modBlocks = blocks.filter((el, index) => {
             return index !== i;
@@ -82,7 +87,7 @@ export default function CustomizedTables() {
     let newBlocks;
     if (blocks.length === 0) newBlocks = [{ courses: [course] }];
     blocks.forEach((data, i) => {
-      if (data.courses[0]?.slot === course.slot) {
+      if (data.courses && data.courses[0]?.slot === course.slot) {
         let modBlocks = blocks.filter((el, index) => {
           return index !== i;
         });
@@ -92,13 +97,117 @@ export default function CustomizedTables() {
         newBlocks = [...blocks, { courses: [course] }];
       }
     });
+
     let newRows = [...rows];
     newRows[row].data[col] = newBlocks;
     setRows(newRows);
   };
 
+  const unallotInvigilator = (row, col, data, index) => {
+    console.log(row);
+    console.log(col);
+    const blocks = rows[row].data[col];
+    const newBlocks = blocks;
+    console.log(newBlocks);
+    newBlocks.forEach((block, i) => {
+      if (block.courses && block.courses[0]?.slot === data.slot) {
+        console.log(block);
+        block.courses.forEach((course, j) => {
+          if (data.name === course.name) {
+            let newAllotedArray = course.allotedInvigilators;
+            newAllotedArray.splice(index, 1);
+            course.allotedInvigilators = newAllotedArray;
+            console.log(course);
+            console.log(index);
+            // course.recommendedInvigilators = course.recommendedInvigilators.filter(
+            //   (el) => {
+            //     console.log(el);
+            //     console.log(invigilator);
+            //     return !(el === invigilator);
+            //   }
+            // );
+          }
+        });
+      }
+    });
+
+    let newRows = [...rows];
+    newRows[row].data[col] = newBlocks;
+    setRows(newRows);
+    console.log(rows);
+  };
+
+  const updateInvigilator = (row, col, data, index, invi) => {
+    console.log(row);
+    console.log(col);
+    const blocks = rows[row].data[col];
+    const newBlocks = blocks;
+    console.log(newBlocks);
+    newBlocks.forEach((block, i) => {
+      if (block.courses && block.courses[0]?.slot === data.slot) {
+        console.log(block);
+        block.courses.forEach((course, j) => {
+          if (data.name === course.name) {
+            let newAllotedArray = course.allotedInvigilators;
+            newAllotedArray[index] = invi;
+            course.allotedInvigilators = newAllotedArray;
+            console.log(course);
+            console.log(index);
+            // course.recommendedInvigilators = course.recommendedInvigilators.filter(
+            //   (el) => {
+            //     console.log(el);
+            //     console.log(invigilator);
+            //     return !(el === invigilator);
+            //   }
+            // );
+          }
+        });
+      }
+    });
+
+    let newRows = [...rows];
+    newRows[row].data[col] = newBlocks;
+    setRows(newRows);
+    console.log(rows);
+  };
+
+  const allotInvigilator = (row, col, data, invigilator) => {
+    const blocks = rows[row].data[col];
+    const newBlocks = blocks;
+    console.log(newBlocks);
+    newBlocks.forEach((block, i) => {
+      if (block.courses && block.courses[0]?.slot === data.slot) {
+        console.log(block);
+        block.courses.forEach((course, j) => {
+          if (data.name === course.name) {
+            course.allotedInvigilators.push(invigilator);
+            // course.recommendedInvigilators = course.recommendedInvigilators.filter(
+            //   (el) => {
+            //     console.log(el);
+            //     console.log(invigilator);
+            //     return !(el === invigilator);
+            //   }
+            // );
+          }
+        });
+      }
+    });
+
+    let newRows = [...rows];
+    newRows[row].data[col] = newBlocks;
+    setRows(newRows);
+    console.log(rows);
+  };
+
   return (
-    <TableContext.Provider value={{ deleteFromTarget, addToTarget }}>
+    <TableContext.Provider
+      value={{
+        deleteFromTarget,
+        addToTarget,
+        unallotInvigilator,
+        updateInvigilator,
+      }}
+    >
       <TableContainer component={Paper}>
         <Table className={classes.table} aria-label="customized table">
           <TableHead>
@@ -112,7 +221,7 @@ export default function CustomizedTables() {
             </TableRow>
           </TableHead>
           <TableBody>
-            {rows.map((row, i) => (
+            {rows?.map((row, i) => (
               <StyledTableRow key={row.name}>
                 <StyledTableCell
                   width="100px"
@@ -126,11 +235,11 @@ export default function CustomizedTables() {
                 >
                   {row.name}
                 </StyledTableCell>
-                {row.data.map((blocks, j) => (
+                {row.data?.map((blocks, j) => (
                   <StyledTableCell>
                     <BlockTarget row={i} col={j}>
                       {blocks?.map((group) => {
-                        return group.courses.length ? (
+                        return group.courses?.length ? (
                           <div
                             style={{
                               border: "1px solid #9FA8DA",
@@ -150,7 +259,15 @@ export default function CustomizedTables() {
                               {group.courses[0].slot}
                             </div>
                             {group.courses.map((el) => {
-                              return <Block data={el} row={i} col={j} />;
+                              return (
+                                <Block
+                                  data={el}
+                                  allotInvigilator={allotInvigilator}
+                                  unallotInvigilator={unallotInvigilator}
+                                  row={i}
+                                  col={j}
+                                />
+                              );
                             })}
                           </div>
                         ) : null;
